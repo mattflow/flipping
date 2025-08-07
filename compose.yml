@@ -7,7 +7,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
   redis:
-    build: redis
+    build: docker/redis
     ports:
       - "6379:6379"
     environment:

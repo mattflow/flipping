@@ -1,3 +1,4 @@
+from time import sleep
 from celery import Celery
 from .config import RabbitMQSettings, RedisSettings
 
@@ -17,4 +18,5 @@ app = Celery(
 
 @app.task
 def add(x, y):
+    sleep(3)
     return x + y

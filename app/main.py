@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from .tasks import add as add_task
@@ -13,8 +14,6 @@ async def redirect_to_docs():
 @app.get("/add")
 async def add(x: int, y: int):
     result = add_task.delay(x, y)
-    return {
-        "task_id": result.id,
-        "status": "Task submitted",
-        "result": result.get(timeout=3),
-    }
+    while not result.ready():
+        await asyncio.sleep(1)
+    return result.get()
