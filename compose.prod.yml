@@ -36,15 +36,11 @@ services:
     command: fastapi run app/main.py --port 80 --proxy-headers
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.entrypoints=websecure"
-      - "traefik.http.routers.api.rule=Host(`${API_DOMAIN}`)"
-      - "traefik.http.routers.api.tls=true"
-      - "traefik.http.routers.api.tls.certresolver=myresolver"
+      - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=80"
-      # - "traefik.http.services.api.loadbalancer.sticky.cookie=true"
-      # - "traefik.http.services.api.loadbalancer.sticky.cookie.name=sticky_cookie"
-      # - "traefik.http.services.api.loadbalancer.sticky.cookie.secure=true"
-      # - "traefik.http.services.api.loadbalancer.sticky.cookie.httpOnly=true"
+      - "traefik.http.routers.blog.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.blog.tls=true"
+      - "traefik.http.routers.blog.tls.certresolver=myresolver"
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
