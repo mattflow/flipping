@@ -1,0 +1,46 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get commit SHA
+        id: vars
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ secrets.PROJECT_ROOT }}
+
+            # Write .env file from individual secrets
+            cat <<EOF > .env
+            EMAIL_ADDRESS=${{ secrets.EMAIL_ADDRESS }}
+            API_DOMAIN=${{ vars.API_DOMAIN }}
+            REDIS_HOST=redis
+            REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            RABBITMQ_HOST=rabbitmq
+            RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
+            RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+            EOF
+
+            git fetch origin
+            git reset --hard ${{ steps.vars.outputs.sha }}
+
+            docker compose -f compose.prod.yml up -d --build
+            docker compose -f compose.prod.yml up -d --scale api=${{ vars.API_REPLICAS }}
+            docker compose -f compose.prod.yml up -d --scale celery=${{ vars.CELERY_REPLICAS }}
