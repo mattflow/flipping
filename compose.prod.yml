@@ -18,6 +18,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
+      - "--log.level=INFO"
     ports:
       - "80:80"
       - "443:443"
